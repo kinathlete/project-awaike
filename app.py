@@ -51,14 +51,13 @@ if "assistant_id_instructions" not in st.session_state:
                 how Calibo helps to solve a particular problem."
             ,"instructions": "See the example prompt below. \
                 Replace the problem with the problem you want to use. \
-                    And attach any relevant files in the sidebar. \
-                        Make sure to reference the file in the prompt. \
-                            Alternatively, you can reference a URL to \
-                                a website that describes the problem."
+                    And reference a URL to a website that \
+                        describes the problem."
             ,"prompt": "Create a draft for a marketing brief about how \
                 enterprise organizations can build their data fabric \
-                    more efficiently with Calibo. Use the attached file \
-                        to understand the concept of Data Fabric better."
+                    more efficiently with Calibo. Use the website \
+                    https://www.gartner.com/en/information-technology/glossary/data-fabric \
+                    to understand the concept of data fabric better."
         },
         "asst_Cnjbb9Q91Gi7HmDhWxnCouXf": {
             "subheader": "Creates drafts for landing pages that show \
@@ -163,7 +162,8 @@ if api_key:
                 st.session_state.existing_file_name_list = assistant_file_list
     
     # Starte conversation with the selected assistant
-    start_conversation()
+    if st.session_state.start_chat == False:
+        start_conversation()
 
     # Divider line
     st.sidebar.divider()
