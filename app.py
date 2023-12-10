@@ -2,14 +2,8 @@
 import openai
 import streamlit as st
 from PIL import Image
-from bs4 import BeautifulSoup
-import requests
-import pdfkit
 import time
 import os
-
-# Set your OpenAI Assistant ID here
-# assistant_id = 'asst_g51Qwp7RKViQEQVaWEjK1aYM'
 
 # Initialize the OpenAI client (ensure to set your API key in the sidebar within the app)
 client = openai
@@ -22,6 +16,8 @@ available_assistant_ids = [
     "asst_vvjDSGC3ojf0YBXG7QtXDUz5",
     "asst_Cnjbb9Q91Gi7HmDhWxnCouXf"
 ]
+
+## SESSION VARIABLES ##
 
 # Initialize session state variables for file IDs and chat control
 if "assistant_name_list" not in st.session_state:
@@ -83,23 +79,14 @@ if "start_chat" not in st.session_state:
 if "thread_id" not in st.session_state:
     st.session_state.thread_id = None
 
+## PAGE CONFIG ##
+
 # Set up the Streamlit page with a title and icon
-st.set_page_config(page_title="ChatGPT-like Chat App", page_icon=":speech_balloon:")
+st.set_page_config(page_title="Awaike - AI-Powered Content Assistant", page_icon=":speech_balloon:")
 
-# Define functions for scraping, converting text to PDF, and uploading to OpenAI
-def scrape_website(url):
-    """Scrape text from a website URL."""
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, "html.parser")
-    return soup.get_text()
+## SIDEBAR FUNCTIONS ##
 
-def text_to_pdf(text, filename):
-    """Convert text content to a PDF file."""
-    path_wkhtmltopdf = '/usr/local/bin/wkhtmltopdf'
-    config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
-    pdfkit.from_string(text, filename, configuration=config)
-    return filename
-
+# Define functions to help with project setup
 def upload_to_openai(filepath):
     """Upload a file to OpenAI and return its file ID."""
     with open(filepath, "rb") as file:
@@ -127,8 +114,9 @@ def get_organization_files():
     organization_files = client.files.list()
     return organization_files
 
-# Show Company logo
-# Logo
+## SIDEBAR ##
+
+# Show Company logo in the sidebar
 dir_root = os.path.dirname(os.path.abspath(__file__))
 logo = Image.open(dir_root+'/files/images/Calibo_229X64_neg.png')
 st.sidebar.image(logo)
@@ -168,18 +156,6 @@ st.sidebar.divider()
 
 # Additional features in the sidebar for web scraping and file uploading
 st.sidebar.header("Prepare the Project :paperclip:")
-# website_url = st.sidebar.text_input("Enter a website URL to scrape and organize into a PDF", key="website_url")
-
-# Button to scrape a website, convert to PDF, and upload to OpenAI
-# if st.sidebar.button("Scrape and Upload"):
-#     # Scrape, convert, and upload process
-#     scraped_text = scrape_website(website_url)
-#     pdf_path = text_to_pdf(scraped_text, "scraped_content.pdf")
-#     file_id = upload_to_openai(pdf_path)
-#     st.session_state.file_id_list.append(file_id)
-#     #st.sidebar.write(f"File ID: {file_id}")
-
-#  project_name = st.sidebar.text_input("Enter a project name", key="project_name")
 
 # Sidebar option for users to upload their own files
 uploaded_file = st.sidebar.file_uploader("Upload additional files to the assistant.", key="file_uploader")
@@ -215,6 +191,7 @@ if st.session_state.existing_file_name_list:
 # Divider line
 st.sidebar.divider()
 
+# Start the chat
 st.sidebar.header("Start the Chat :rocket:")
 # Button to start the chat session
 if st.sidebar.button("Start Chat"):
@@ -227,6 +204,8 @@ if st.sidebar.button("Start Chat"):
         st.write("thread id: ", thread.id)
     else:
         st.sidebar.warning("Please upload at least one file to start the chat.")
+
+## MAIN CHAT FUNCTIONS ##
 
 # Define the function to process messages with citations
 def process_message_with_citations(message):
