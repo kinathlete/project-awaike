@@ -114,6 +114,17 @@ def get_organization_files():
     organization_files = client.files.list()
     return organization_files
 
+def reset_conversation():
+    st.session_state.messages = []
+    start_conversation()
+
+def start_conversation():
+    st.session_state.start_chat = True
+    # Create a thread once and store its ID in session state
+    thread = client.beta.threads.create()
+    st.session_state.thread_id = thread.id
+    st.write("thread id: ", thread.id)
+
 ## SIDEBAR ##
 
 # Show Company logo in the sidebar
@@ -150,60 +161,44 @@ if api_key:
                             assistant_file_list.append(org_file.filename)
                 st.session_state.existing_file_id_list = assistant_file_id_list
                 st.session_state.existing_file_name_list = assistant_file_list
+    
+    # Starte conversation with the selected assistant
+    start_conversation()
 
-# Divider line
-st.sidebar.divider()
+    # Divider line
+    st.sidebar.divider()
 
-# Additional features in the sidebar for web scraping and file uploading
-st.sidebar.header("Prepare the Project :paperclip:")
+    # Reset the chat
+    st.sidebar.header("Reset the Chat :rocket:")
+    # Button to reset the chat session
+    if st.session_state.start_chat: 
+        st.sidebar.button("Reset Chat", on_click=reset_conversation, type="primary")
 
-# Sidebar option for users to upload their own files
-uploaded_file = st.sidebar.file_uploader("Upload additional files to the assistant.", key="file_uploader")
+    # Divider line
+    st.sidebar.divider()
 
-# Button to upload a user's file and store the file ID
-if st.sidebar.button("Upload File"):
-    # Upload file provided by user
-    if uploaded_file:
-        with open(f"{uploaded_file.name}", "wb") as f:
-            f.write(uploaded_file.getbuffer())
-        additional_file_id = upload_to_openai(f"{uploaded_file.name}")
-        st.session_state.file_id_list.append(additional_file_id)
-        st.sidebar.write(f"Additional File ID: {additional_file_id}")
+    # Additional features in the sidebar for web scraping and file uploading
+    st.sidebar.header("Prepare the Project :paperclip:")
 
-# Display all new file IDs
-if st.session_state.file_id_list:
-    st.sidebar.write("Uploaded File IDs:")
-    for file_id in st.session_state.file_id_list:
-        st.sidebar.write(file_id)
-        # Associate files with the assistant
-        assistant_file = client.beta.assistants.files.create(
-            assistant_id=assistant_id, 
-            file_id=file_id
-        )
+    # Sidebar option for users to upload their own files
+    uploaded_file = st.sidebar.file_uploader("Upload additional files to the assistant.", key="file_uploader")
 
-# Display all existing file names
-if st.session_state.existing_file_name_list:
-    st.sidebar.write("Knowledge Base:")
-    for file_name in st.session_state.existing_file_name_list:
-        name = '<p style="font-size: 10px;">{0}</p>'.format(file_name)
-        st.sidebar.write(name, unsafe_allow_html=True)
+    # Button to upload a user's file and store the file ID
+    if st.sidebar.button("Upload File"):
+        # Upload file provided by user
+        if uploaded_file:
+            with open(f"{uploaded_file.name}", "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            additional_file_id = upload_to_openai(f"{uploaded_file.name}")
+            st.session_state.file_id_list.append(additional_file_id)
+            st.sidebar.write(f"Additional File ID: {additional_file_id}")
 
-# Divider line
-st.sidebar.divider()
-
-# Start the chat
-st.sidebar.header("Start the Chat :rocket:")
-# Button to start the chat session
-if st.sidebar.button("Start Chat"):
-    # Check if files are uploaded before starting chat
-    if st.session_state.file_id_list or st.session_state.existing_file_id_list:
-        st.session_state.start_chat = True
-        # Create a thread once and store its ID in session state
-        thread = client.beta.threads.create()
-        st.session_state.thread_id = thread.id
-        st.write("thread id: ", thread.id)
-    else:
-        st.sidebar.warning("Please upload at least one file to start the chat.")
+    # Display all existing file names
+    if st.session_state.existing_file_name_list:
+        st.sidebar.write("Knowledge Base:")
+        for file_name in st.session_state.existing_file_name_list:
+            name = '<p style="font-size: 10px;">{0}</p>'.format(file_name)
+            st.sidebar.write(name, unsafe_allow_html=True)
 
 ## MAIN CHAT FUNCTIONS ##
 
@@ -303,4 +298,4 @@ if st.session_state.start_chat:
                 st.markdown(full_response, unsafe_allow_html=True)
 else:
     # Prompt to start the chat
-    st.write("Please enter API Key, upload files and click 'Start Chat' to begin the conversation.")
+    st.write("Please enter API Key to begin your work with the assistant.")
