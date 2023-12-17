@@ -151,7 +151,7 @@ st.set_page_config(page_title="Awaike - AI-Powered Content Assistant", page_icon
 def upload_to_openai(filepath):
     """Upload a file to OpenAI and return its file ID."""
     with open(filepath, "rb") as file:
-        response = openai.files.create(file=file.read(), purpose="assistants")
+        response = openai.files.create(file=open(filepath, "rb"), purpose="assistants")
     return response.id
 
 def get_assistants():
@@ -246,20 +246,20 @@ if api_key:
     st.sidebar.divider()
 
     # Additional features in the sidebar for web scraping and file uploading
-    st.sidebar.header("Prepare the Project :paperclip:")
+    st.sidebar.header("Edit the Assistant :paperclip:")
 
-    # Sidebar option for users to upload their own files
-    uploaded_file = st.sidebar.file_uploader("Upload additional files to the assistant.", key="file_uploader")
+    # # Sidebar option for users to upload their own files
+    # uploaded_file = st.sidebar.file_uploader("Upload additional files to the assistant.", key="file_uploader")
 
-    # Button to upload a user's file and store the file ID
-    if st.sidebar.button("Upload File"):
-        # Upload file provided by user
-        if uploaded_file:
-            with open(f"{uploaded_file.name}", "wb") as f:
-                f.write(uploaded_file.getbuffer())
-            additional_file_id = upload_to_openai(f"{uploaded_file.name}")
-            st.session_state.file_id_list.append(additional_file_id)
-            st.sidebar.write(f"Additional File ID: {additional_file_id}")
+    # # Button to upload a user's file and store the file ID
+    # if st.sidebar.button("Upload File"):
+    #     # Upload file provided by user
+    #     if uploaded_file:
+    #         with open(f"{uploaded_file.name}", "wb") as f:
+    #             f.write(uploaded_file.getbuffer())
+    #         additional_file_id = upload_to_openai(f"{uploaded_file.name}")
+    #         st.session_state.file_id_list.append(additional_file_id)
+    #         st.sidebar.write(f"Additional File ID: {additional_file_id}")
 
     # Display all existing file names
     if st.session_state.existing_file_name_list:
@@ -320,18 +320,30 @@ if st.session_state.start_chat:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
+    # Let user attach file to message
+    uploaded_file = st.file_uploader("Attach files to your message.", type=["pdf"], key="message_file_uploader")
+
     # Chat input for the user
     if prompt := st.chat_input("What shall I do?", key="chat_input"):
         # Add user message to the state and display it
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
+            if uploaded_file:
+                st.markdown(f"File attached: {uploaded_file.name}")
+
+        # Upload files provided by user
+        if uploaded_file:
+            with open(f"{uploaded_file.name}", "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            additional_file_id = upload_to_openai(f"{uploaded_file.name}")
 
         # Add the user's message to the existing thread
         client.beta.threads.messages.create(
             thread_id=st.session_state.thread_id,
             role="user",
-            content=prompt
+            content=prompt,
+            file_ids=[additional_file_id] if uploaded_file else []
         )
 
         # Create a run with additional instructions
