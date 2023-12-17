@@ -12,9 +12,13 @@ client = openai
 
 # Initialize variable to store assistant ids
 available_assistant_ids = [
-    "asst_LItDuB8TJeX8UojC21zzoNDw",
-    "asst_vvjDSGC3ojf0YBXG7QtXDUz5",
-    "asst_Cnjbb9Q91Gi7HmDhWxnCouXf"
+    "asst_LItDuB8TJeX8UojC21zzoNDw" # Persona Marketing Briefs
+    ,"asst_vvjDSGC3ojf0YBXG7QtXDUz5" # Problem Marketing Briefs
+    ,"asst_Cnjbb9Q91Gi7HmDhWxnCouXf" # Technology Comparison Pages
+    ,"asst_2RwWE7PObHVUxta6YHChgNXv" # Content Creator Marketing Briefs
+    ,"asst_cuNHZWVmMTSGZE6hoGplgH27" # Calibo Sales
+    ,"asst_k0AWkqe2WOvcapTeaJyzUhlJ" # Calibo Marketing
+    ,"asst_fHy8v3BaH1i9CdsIURkm4hb8" # Calibo Product
 ]
 
 ## SESSION VARIABLES ##
@@ -70,6 +74,56 @@ if "assistant_id_instructions" not in st.session_state:
                 snowflake: https://www.snowflake.com/en/, \
                     databricks: https://www.databricks.com/"
         },
+        "asst_2RwWE7PObHVUxta6YHChgNXv": {
+            "subheader": "Creates drafts for marketing briefs about \
+                how a particular persona benefits from using Calibo. \
+                    Works with sales, marketing and product assistants \
+                        to create the briefs."
+            ,"instructions": "See the example prompt below. \
+                Replace the persona name with the persona you want to use."
+            ,"prompt": "Create a draft for a compelling 1-2 pager marketing \
+                brief about how Product Managers can use Calibo and what \
+                    their benefits are from using it."
+        },
+        "asst_cuNHZWVmMTSGZE6hoGplgH27": {
+            "subheader": "Answers any sales related questions about Calibo."
+            ,"instructions": "Ask me anything about Sales at Calibo."
+            ,"prompt": "How much does Calibo cost?"
+        },
+        "asst_k0AWkqe2WOvcapTeaJyzUhlJ": {
+            "subheader": "Answers any marketing related questions about Calibo."
+            ,"instructions": "Ask me anything about Marketing at Calibo."
+            ,"prompt": "Who benefits most from using Calibo?"
+        },
+        "asst_fHy8v3BaH1i9CdsIURkm4hb8": {
+            "subheader": "Answers any product related questions about Calibo."
+            ,"instructions": "Ask me anything about Product at Calibo."
+            ,"prompt": "What is the difference between Calibo and Azure DevOps?"
+        }
+    }
+    
+if "automation_prompts" not in st.session_state:
+    st.session_state.automation_prompts = {
+        # 1 Marketing Briefs <Personas>
+        "asst_2RwWE7PObHVUxta6YHChgNXv": [
+            {
+                "assistant_id": "asst_cuNHZWVmMTSGZE6hoGplgH27"
+                ,"prompt": "Answer all sales related questions above."
+            }
+            ,{
+                "assistant_id": "asst_k0AWkqe2WOvcapTeaJyzUhlJ"
+                ,"prompt": "Answer all marketing related questions above."
+            }
+            ,{
+                "assistant_id": "asst_fHy8v3BaH1i9CdsIURkm4hb8"
+                ,"prompt": "Answer all product related questions above."
+            }
+            ,{
+                "assistant_id": "asst_2RwWE7PObHVUxta6YHChgNXv"
+                ,"prompt": "Now create the marketing brief with the \
+                    information above."
+            }
+        ]
     }
 
 if "start_chat" not in st.session_state:
@@ -128,7 +182,7 @@ def start_conversation():
 
 # Show Company logo in the sidebar
 dir_root = os.path.dirname(os.path.abspath(__file__))
-logo = Image.open(dir_root+'/files/images/Calibo_229X64_neg.png')
+logo = Image.open(dir_root+'/files/images/Digital Logo_Calibo.png')
 st.sidebar.image(logo)
 
 # Create a sidebar for API key configuration and additional features
@@ -296,6 +350,54 @@ if st.session_state.start_chat:
             st.session_state.messages.append({"role": "assistant", "content": full_response})
             with st.chat_message("assistant"):
                 st.markdown(full_response, unsafe_allow_html=True)
+
+        # Run automation for the selected assistant
+        if assistant_id == "asst_2RwWE7PObHVUxta6YHChgNXv":
+
+            for automation_prompt in st.session_state.automation_prompts[assistant_id]:
+                # Add automated user message to the state and display it
+                st.session_state.messages.append({"role": "user", "content": automation_prompt["prompt"]})
+                with st.chat_message("user"):
+                    st.markdown(automation_prompt["prompt"])
+                
+                # Add the automated user message to the existing thread
+                client.beta.threads.messages.create(
+                    thread_id=st.session_state.thread_id,
+                    role="user",
+                    content=automation_prompt["prompt"]
+                )
+                
+                # Create a run with additional instructions
+                run = client.beta.threads.runs.create(
+                    thread_id=st.session_state.thread_id,
+                    assistant_id=automation_prompt["assistant_id"]
+                )
+
+                # Poll for the run to complete and retrieve the assistant's messages
+                while run.status != 'completed':
+                    time.sleep(1)
+                    run = client.beta.threads.runs.retrieve(
+                        thread_id=st.session_state.thread_id,
+                        run_id=run.id
+                    )
+
+                # Retrieve messages added by the assistant
+                messages = client.beta.threads.messages.list(
+                    thread_id=st.session_state.thread_id
+                )
+
+                # Process and display assistant messages
+                assistant_messages_for_run = [
+                    message for message in messages 
+                    if message.run_id == run.id and message.role == "assistant"
+                ]
+
+                for message in reversed(assistant_messages_for_run):
+                    full_response = process_message_with_citations(message)
+                    st.session_state.messages.append({"role": "assistant", "content": full_response})
+                    with st.chat_message("assistant"):
+                        st.markdown(full_response, unsafe_allow_html=True)
+
 else:
     # Prompt to start the chat
     st.write("Please enter API Key to begin your work with the assistant.")
