@@ -108,18 +108,26 @@ if "automation_prompts" not in st.session_state:
         "asst_2RwWE7PObHVUxta6YHChgNXv": [
             {
                 "assistant_id": "asst_cuNHZWVmMTSGZE6hoGplgH27"
+                ,"assistant_name": "Sales Calibo"
+                ,"image_path": "files/images/sales.png"
                 ,"prompt": "Answer all sales related questions above."
             }
             ,{
                 "assistant_id": "asst_k0AWkqe2WOvcapTeaJyzUhlJ"
+                ,"assistant_name": "Marketing Calibo"
+                ,"image_path": "files/images/marketing.png"
                 ,"prompt": "Answer all marketing related questions above."
             }
             ,{
                 "assistant_id": "asst_fHy8v3BaH1i9CdsIURkm4hb8"
+                ,"assistant_name": "Product Calibo"
+                ,"image_path": "files/images/product.png"
                 ,"prompt": "Answer all product related questions above."
             }
             ,{
                 "assistant_id": "asst_2RwWE7PObHVUxta6YHChgNXv"
+                ,"assistant_name": "Content Creator"
+                ,"image_path": "files/images/content_creator.png"
                 ,"prompt": "Now create the marketing brief with the \
                     information above."
             }
@@ -218,6 +226,12 @@ if api_key:
     # Starte conversation with the selected assistant
     if st.session_state.start_chat == False:
         start_conversation()
+
+    # Toogle to activate automation for the selected assistant
+    if assistant_id == "asst_2RwWE7PObHVUxta6YHChgNXv":
+        st.sidebar.divider()
+        st.sidebar.header("Activate Assistant Automation :car:")
+        automation_active = st.sidebar.toggle("Assistant Automation", value=True, key="automation_toggle")
 
     # Divider line
     st.sidebar.divider()
@@ -352,7 +366,7 @@ if st.session_state.start_chat:
                 st.markdown(full_response, unsafe_allow_html=True)
 
         # Run automation for the selected assistant
-        if assistant_id == "asst_2RwWE7PObHVUxta6YHChgNXv":
+        if assistant_id == "asst_2RwWE7PObHVUxta6YHChgNXv" and automation_active:
 
             for automation_prompt in st.session_state.automation_prompts[assistant_id]:
                 # Add automated user message to the state and display it
@@ -397,6 +411,9 @@ if st.session_state.start_chat:
                     st.session_state.messages.append({"role": "assistant", "content": full_response})
                     with st.chat_message("assistant"):
                         st.markdown(full_response, unsafe_allow_html=True)
+                
+                # Change assistant automation toggle to false
+                automation_active = False
 
 else:
     # Prompt to start the chat
