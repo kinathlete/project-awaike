@@ -255,7 +255,7 @@ def process_message_with_citations(message):
 if st.session_state.selected_assistant_name:
     st.title("{0} :robot_face:".format(st.session_state.selected_assistant_name))
     st.subheader(st.session_state.assistant_id_instructions[assistant_id]["subheader"])
-    st.write("*{0}}*".format(st.session_state.assistant_id_instructions[assistant_id]["instructions"]))
+    st.write("*{0}*".format(st.session_state.assistant_id_instructions[assistant_id]["instructions"]))
     st.write("**Example Prompt**")
     st.write(st.session_state.assistant_id_instructions[assistant_id]["prompt"])
 else:
