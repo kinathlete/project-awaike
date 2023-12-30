@@ -12,13 +12,11 @@ client = openai
 
 # Initialize variable to store assistant ids
 available_assistant_ids = [
-    "asst_LItDuB8TJeX8UojC21zzoNDw" # Persona Marketing Briefs
-    ,"asst_vvjDSGC3ojf0YBXG7QtXDUz5" # Problem Marketing Briefs
-    ,"asst_Cnjbb9Q91Gi7HmDhWxnCouXf" # Technology Comparison Pages
-    ,"asst_2RwWE7PObHVUxta6YHChgNXv" # Content Creator Marketing Briefs
+    "asst_c31H2OYVhod2mY2R2rp6E8Ta" # Calibo Universal Assistant
     ,"asst_cuNHZWVmMTSGZE6hoGplgH27" # Calibo Sales
     ,"asst_k0AWkqe2WOvcapTeaJyzUhlJ" # Calibo Marketing
     ,"asst_fHy8v3BaH1i9CdsIURkm4hb8" # Calibo Product
+    # ,"asst_lBblJYey0PciYoPmZFFPAKXF" # Calibo Internet Assistant
 ]
 
 ## SESSION VARIABLES ##
@@ -41,97 +39,65 @@ if "file_id_list" not in st.session_state:
 
 if "assistant_id_instructions" not in st.session_state:
     st.session_state.assistant_id_instructions = {
-        "asst_LItDuB8TJeX8UojC21zzoNDw": {
-            "subheader": "Creates drafts for marketing briefs about \
-                how a particular persona benefits from using Calibo."
-            ,"instructions": "See the example prompt below. \
-                Replace the persona name with the persona you want to use."
-            ,"prompt": "Create a draft for a compelling marketing brief \
-                about how Product Owners can use Calibo and what their \
-                    benefits are from using it."
+        # sales assistant
+        "asst_cuNHZWVmMTSGZE6hoGplgH27": {
+            "subheader": "Helping on sales related questions about Calibo."
+            ,"instructions": "Ask me specific questions about sales at Calibo \
+                or refer to a list of questions that I should answer from the \
+                    knowledge I have gained about the company so far. With my \
+                        30+ years of experience in sales, I can also advise you \
+                            on how to best approach your sales strategy. Just \
+                                use me as your sounding board for sales matters."
+            ,"prompt": "What's Calibo's sales strategy today?"
         },
-        "asst_vvjDSGC3ojf0YBXG7QtXDUz5": {
-            "subheader": "Creates drafts for marketing briefs about \
-                how Calibo helps to solve a particular problem."
-            ,"instructions": "See the example prompt below. \
-                Replace the problem with the problem you want to use. \
-                    And reference a URL to a website that \
-                        describes the problem."
-            ,"prompt": "Create a draft for a marketing brief about how \
-                enterprise organizations can build their data fabric \
-                    more efficiently with Calibo. Use the website \
-                    https://www.gartner.com/en/information-technology/glossary/data-fabric \
-                    to understand the concept of data fabric better."
+        # marketing assistant
+        "asst_k0AWkqe2WOvcapTeaJyzUhlJ": {
+            "subheader": "Helping on marketing related questions about Calibo."
+            ,"instructions": "Ask me questions about previous marketing campaigns \
+                 of Calibo or refer to a list of questions that I should answer \
+                    to the best of my ability. I bring 30+ years of experience \
+                        in B2B software marketing and I'm happy to advise on \
+                            ideal marketing strategies for Calibo tailored to \
+                                 your needs."
+            ,"prompt": "What are key benefits of Calibo for Enterprise Product \
+                Managers?"
         },
-        "asst_Cnjbb9Q91Gi7HmDhWxnCouXf": {
-            "subheader": "Creates drafts for landing pages that show \
-                how Calibo perfectly matches with other technologies."
-            ,"instructions": "See the example prompt below. \
-                Replace the technology names with the technologies \
-                    you want to use. And replace the URLs with the \
-                        corresponding URLs of your selected technologies."
-            ,"prompt": "calibo: https://www.calibo.com/, \
-                snowflake: https://www.snowflake.com/en/, \
-                    databricks: https://www.databricks.com/"
+        # product assistant
+        "asst_fHy8v3BaH1i9CdsIURkm4hb8": {
+            "subheader": "Helping on product related questions about Calibo."
+            ,"instructions": "Ask me about Calibo's product features and \
+                central concepts of our platform or refer to a list of \
+                    questions that I should answer based on my knowledge \
+                        about the product. I have 30+ years of experience \
+                            in product management and I'm happy to advise \
+                                you on how to best position Calibo in the \
+                                    market from a technical perspective."
+            ,"prompt": "What is the difference between Calibo and Azure DevOps?"
         },
-        "asst_2RwWE7PObHVUxta6YHChgNXv": {
-            "subheader": "Creates drafts for marketing briefs about \
-                how a particular persona benefits from using Calibo. \
-                    Works with sales, marketing and product assistants \
-                        to create the briefs."
-            ,"instructions": "See the example prompt below. \
-                Replace the persona name with the persona you want to use."
+        # universal assistant
+        "asst_c31H2OYVhod2mY2R2rp6E8Ta": {
+            "subheader": "Helping you to scale up Calibo to new heights."
+            ,"instructions": "Ask me to help you with any request in the areas of \
+                content creation, strategy development or market and competitive \
+                    research. I can currently work with PDF attachments but cannot \
+                        access the internet. Start with the sample prompt below \
+                            or create your own. You can always ask me what \
+                                I can do for you if you are unsure. I am working \
+                                    really well, when I can interact with the \
+                                        other Calibo expert assistants. Let's go!"
             ,"prompt": "Create a draft for a compelling 1-2 pager marketing \
                 brief about how Product Managers can use Calibo and what \
                     their benefits are from using it."
         },
-        "asst_cuNHZWVmMTSGZE6hoGplgH27": {
-            "subheader": "Answers any sales related questions about Calibo."
-            ,"instructions": "Ask me anything about Sales at Calibo."
-            ,"prompt": "How much does Calibo cost?"
-        },
-        "asst_k0AWkqe2WOvcapTeaJyzUhlJ": {
-            "subheader": "Answers any marketing related questions about Calibo."
-            ,"instructions": "Ask me anything about Marketing at Calibo."
-            ,"prompt": "Who benefits most from using Calibo?"
-        },
-        "asst_fHy8v3BaH1i9CdsIURkm4hb8": {
-            "subheader": "Answers any product related questions about Calibo."
-            ,"instructions": "Ask me anything about Product at Calibo."
-            ,"prompt": "What is the difference between Calibo and Azure DevOps?"
+        # internet assistant
+        "asst_lBblJYey0PciYoPmZFFPAKXF": {
+            "subheader": "Helps the user with any request that involves \
+                researching the internet."
+            ,"instructions": "Provide questions and URLs to the websites \
+                you want to access and summarize."
+            ,"prompt": "Summarize the contents from www.snowflake.com."
         }
-    }
-    
-if "automation_prompts" not in st.session_state:
-    st.session_state.automation_prompts = {
-        # 1 Marketing Briefs <Personas>
-        "asst_2RwWE7PObHVUxta6YHChgNXv": [
-            {
-                "assistant_id": "asst_cuNHZWVmMTSGZE6hoGplgH27"
-                ,"assistant_name": "Sales Calibo"
-                ,"image_path": "files/images/sales.png"
-                ,"prompt": "Answer all sales related questions above."
-            }
-            ,{
-                "assistant_id": "asst_k0AWkqe2WOvcapTeaJyzUhlJ"
-                ,"assistant_name": "Marketing Calibo"
-                ,"image_path": "files/images/marketing.png"
-                ,"prompt": "Answer all marketing related questions above."
-            }
-            ,{
-                "assistant_id": "asst_fHy8v3BaH1i9CdsIURkm4hb8"
-                ,"assistant_name": "Product Calibo"
-                ,"image_path": "files/images/product.png"
-                ,"prompt": "Answer all product related questions above."
-            }
-            ,{
-                "assistant_id": "asst_2RwWE7PObHVUxta6YHChgNXv"
-                ,"assistant_name": "Content Creator"
-                ,"image_path": "files/images/content_creator.png"
-                ,"prompt": "Now create the marketing brief with the \
-                    information above."
-            }
-        ]
+
     }
 
 if "start_chat" not in st.session_state:
@@ -149,13 +115,11 @@ st.set_page_config(page_title="Awaike - AI-Powered Content Assistant", page_icon
 
 # Define functions to help with project setup
 def upload_to_openai(filepath):
-    """Upload a file to OpenAI and return its file ID."""
     with open(filepath, "rb") as file:
         response = openai.files.create(file=open(filepath, "rb"), purpose="assistants")
     return response.id
 
 def get_assistants():
-    """Retrieve the list of assistants associated with an organization."""
     all_assistants = client.beta.assistants.list()
     assistants = []
     for assistant in all_assistants:
@@ -164,14 +128,12 @@ def get_assistants():
     return assistants
 
 def get_assistant_files(assistant_id):
-    """Retrieve the list of files associated with an assistant."""
     assistant_files = client.beta.assistants.files.list(
         assistant_id=assistant_id
     )
     return assistant_files
 
 def get_organization_files():
-    """Retrieve the list of files associated with an organization."""
     organization_files = client.files.list()
     return organization_files
 
@@ -184,7 +146,7 @@ def start_conversation():
     # Create a thread once and store its ID in session state
     thread = client.beta.threads.create()
     st.session_state.thread_id = thread.id
-    st.write("thread id: ", thread.id)
+    # st.write("thread id: ", thread.id)
 
 ## SIDEBAR ##
 
@@ -227,17 +189,11 @@ if api_key:
     if st.session_state.start_chat == False:
         start_conversation()
 
-    # Toogle to activate automation for the selected assistant
-    if assistant_id == "asst_2RwWE7PObHVUxta6YHChgNXv":
-        st.sidebar.divider()
-        st.sidebar.header("Activate Assistant Automation :car:")
-        automation_active = st.sidebar.toggle("Assistant Automation", value=True, key="automation_toggle")
-
     # Divider line
     st.sidebar.divider()
 
     # Reset the chat
-    st.sidebar.header("Reset the Chat :rocket:")
+    st.sidebar.header("Reset the Chat :rewind:")
     # Button to reset the chat session
     if st.session_state.start_chat: 
         st.sidebar.button("Reset Chat", on_click=reset_conversation, type="primary")
@@ -272,7 +228,6 @@ if api_key:
 
 # Define the function to process messages with citations
 def process_message_with_citations(message):
-    """Extract content and annotations from the message and format citations as footnotes."""
     message_content = message.content[0].text
     annotations = message_content.annotations if hasattr(message_content, 'annotations') else []
     citations = []
@@ -300,12 +255,13 @@ def process_message_with_citations(message):
 if st.session_state.selected_assistant_name:
     st.title("{0} :robot_face:".format(st.session_state.selected_assistant_name))
     st.subheader(st.session_state.assistant_id_instructions[assistant_id]["subheader"])
-    st.write(":exclamation: {0} :exclamation:".format(st.session_state.assistant_id_instructions[assistant_id]["instructions"]))
+    st.write(f"*{st.session_state.assistant_id_instructions[assistant_id]["instructions"]}*")
     st.write("**Example Prompt**")
     st.write(st.session_state.assistant_id_instructions[assistant_id]["prompt"])
 else:
     st.title("Welcome to Awaike! :wave:")
-    st.subheader("This is a revolutionary chat application that helps you to create compelling marketing content for your product.")
+    st.subheader("The revolutionary AI-assistant app promising to \
+                 gain you the competitive edge you have been looking for.")
 
 # Only show the chat interface if the chat has been started
 if st.session_state.start_chat:
@@ -318,6 +274,7 @@ if st.session_state.start_chat:
     # Display existing messages in the chat
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
+            st.markdown(f"**{message["name"]}**")
             st.markdown(message["content"])
 
     # Let user attach file to message
@@ -326,8 +283,9 @@ if st.session_state.start_chat:
     # Chat input for the user
     if prompt := st.chat_input("What shall I do?", key="chat_input"):
         # Add user message to the state and display it
-        st.session_state.messages.append({"role": "user", "content": prompt})
+        st.session_state.messages.append({"role": "user", "name": "You", "content": prompt})
         with st.chat_message("user"):
+            st.markdown("**You**")
             st.markdown(prompt)
             if uploaded_file:
                 st.markdown(f"File attached: {uploaded_file.name}")
@@ -373,60 +331,13 @@ if st.session_state.start_chat:
 
         for message in reversed(assistant_messages_for_run):
             full_response = process_message_with_citations(message)
-            st.session_state.messages.append({"role": "assistant", "content": full_response})
+            st.session_state.messages.append({"role": "assistant", "name": \
+                                              st.session_state.selected_assistant_name, \
+                                                "content": full_response})
             with st.chat_message("assistant"):
+                st.markdown(f"**{st.session_state.selected_assistant_name}**")
                 st.markdown(full_response, unsafe_allow_html=True)
-
-        # Run automation for the selected assistant
-        if assistant_id == "asst_2RwWE7PObHVUxta6YHChgNXv" and automation_active:
-
-            for automation_prompt in st.session_state.automation_prompts[assistant_id]:
-                # Add automated user message to the state and display it
-                st.session_state.messages.append({"role": "user", "content": automation_prompt["prompt"]})
-                with st.chat_message("user"):
-                    st.markdown(automation_prompt["prompt"])
-                
-                # Add the automated user message to the existing thread
-                client.beta.threads.messages.create(
-                    thread_id=st.session_state.thread_id,
-                    role="user",
-                    content=automation_prompt["prompt"]
-                )
-                
-                # Create a run with additional instructions
-                run = client.beta.threads.runs.create(
-                    thread_id=st.session_state.thread_id,
-                    assistant_id=automation_prompt["assistant_id"]
-                )
-
-                # Poll for the run to complete and retrieve the assistant's messages
-                while run.status != 'completed':
-                    time.sleep(1)
-                    run = client.beta.threads.runs.retrieve(
-                        thread_id=st.session_state.thread_id,
-                        run_id=run.id
-                    )
-
-                # Retrieve messages added by the assistant
-                messages = client.beta.threads.messages.list(
-                    thread_id=st.session_state.thread_id
-                )
-
-                # Process and display assistant messages
-                assistant_messages_for_run = [
-                    message for message in messages 
-                    if message.run_id == run.id and message.role == "assistant"
-                ]
-
-                for message in reversed(assistant_messages_for_run):
-                    full_response = process_message_with_citations(message)
-                    st.session_state.messages.append({"role": "assistant", "content": full_response})
-                    with st.chat_message("assistant"):
-                        st.markdown(full_response, unsafe_allow_html=True)
-                
-                # Change assistant automation toggle to false
-                automation_active = False
 
 else:
     # Prompt to start the chat
-    st.write("Please enter API Key to begin your work with the assistant.")
+    st.write("Please enter API Key to begin your work with the assistants.")
