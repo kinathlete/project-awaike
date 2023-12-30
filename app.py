@@ -274,7 +274,7 @@ if st.session_state.start_chat:
     # Display existing messages in the chat
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
-            st.markdown(f"**{message["name"]}**")
+            st.markdown("**{0}**".format(message["name"]))
             st.markdown(message["content"])
 
     # Let user attach file to message
