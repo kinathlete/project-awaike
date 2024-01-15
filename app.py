@@ -5,6 +5,7 @@ from PIL import Image
 import time
 import os
 
+tst = "test"
 # Initialize the OpenAI client (ensure to set your API key in the sidebar within the app)
 client = openai
 # Retrieve OpenAI API key from environment variables
