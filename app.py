@@ -92,7 +92,7 @@ if "assistant_id_instructions" not in st.session_state:
                                     really well, when I can interact with the \
                                         other Calibo expert assistants. Let's go!"
             ,"prompt": "Take everything that you know about our competitor \
-                Harness from the attached document (harness_homepage.pdf) and \
+                Harness from https://www.harness.io/ and \
                     understand their market positioning and main features. Then \
                         create a structured comparison report between Calibo \
                             and Harness and highlight the key differences \
@@ -111,14 +111,10 @@ if "assistant_id_instructions" not in st.session_state:
                                 and marketing briefs. Start with the sample prompt below \
                             or create your own. You can always ask me what \
                                 I can do for you if you are unsure. Let's go!"
-            ,"prompt": "Take everything that you know about our competitor \
-                Harness from https://www.harness.io/ and \
-                    understand their market positioning and main features. Then \
-                        create a structured comparison report between Calibo \
-                            and Harness and highlight the key differences \
-                                between the two products. Give recommendations \
-                                    on how to position Calibo against Harness \
-                                        in the market."
+            ,"prompt": "Take everything that you know about Calibo and combine that \
+                knowledge with everything you know about Snowflake (the data software \
+                    company). Then create a marketing brief about why Calibo and Snowflake \
+                        are a match in heaven for enterprise customers."
         },  
         # content creator marketing briefs
         "asst_2RwWE7PObHVUxta6YHChgNXv": {

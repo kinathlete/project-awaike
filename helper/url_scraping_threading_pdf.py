@@ -210,9 +210,10 @@ def main(full_process, base_url):
     token_limit = 2000000
     current_tokens = [0]
 
+    start_time = time.time()
+
     if full_process:
         # Full multi-threaded scraping and processing
-        start_time = time.time()
         num_threads = 30
         threads = []
         lock = threading.Lock()
@@ -237,7 +238,7 @@ def main(full_process, base_url):
 
     else:
         # Only process the base URL
-        html_data = get_text_from_url(base_url)
+        html_data, abc = get_text_from_url(base_url)
         if html_data:
             save_to_html([html_data], html_folder)
     
