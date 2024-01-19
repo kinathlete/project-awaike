@@ -238,6 +238,9 @@ def main(full_process, base_url):
     else:
         # Only process the base URL
         html_data = get_text_from_url(base_url)
+        print("teeeeeest")
+        
+        print(html_data)
         if html_data:
             save_to_html([html_data], html_folder)
     
@@ -250,5 +253,6 @@ def main(full_process, base_url):
 
     return pdf_file_paths
 
+main(False,'https://developer.harness.io/docs/')
 # if __name__ == "__main__":
 #     main()
