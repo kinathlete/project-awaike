@@ -11,6 +11,9 @@ import re
 import tiktoken
 # from weasyprint import HTML
 
+# Configure pdfkit to use the binary
+# config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
+
 def convert_html_to_pdf(html_folder, pdf_folder):
     if not os.path.exists(pdf_folder):
         os.makedirs(pdf_folder)

@@ -112,7 +112,7 @@ if "assistant_id_instructions" not in st.session_state:
                             or create your own. You can always ask me what \
                                 I can do for you if you are unsure. Let's go!"
             ,"prompt": "Take everything that you know about our competitor \
-                Harness from https://developer.harness.io/docs/ and \
+                Harness from https://www.harness.io/ and \
                     understand their market positioning and main features. Then \
                         create a structured comparison report between Calibo \
                             and Harness and highlight the key differences \
@@ -366,7 +366,6 @@ if st.session_state.start_chat:
             with open(f"{uploaded_file.name}", "wb") as f:
                 f.write(uploaded_file.getbuffer())
             st.session_state.uploaded_file_id_list.append(upload_to_openai(f"{uploaded_file.name}"))
-            print(st.session_state.uploaded_file_id_list)
 
     if st.session_state.last_prompt:               
         # If the prompt contains a URL, ask the user about scraping mode
