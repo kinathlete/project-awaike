@@ -197,6 +197,11 @@ def get_organization_files():
 
 def reset_conversation():
     st.session_state.messages = []
+    st.session_state.last_prompt = None
+    st.session_state.run_with_scraping = False
+    st.session_state.scraping_option = None
+    st.session_state.uploaded_file_id_list = []
+    st.session_state.scraping_file_id_list = []
     start_conversation()
 
 def start_conversation():
