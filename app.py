@@ -4,6 +4,10 @@ import streamlit as st
 from PIL import Image
 import time
 import os
+import re
+
+# Import helper functions
+import helper.url_scraping_threading_pdf as scraping
 
 # Initialize the OpenAI client (ensure to set your API key in the sidebar within the app)
 client = openai
@@ -13,6 +17,8 @@ client = openai
 # Initialize variable to store assistant ids
 available_assistant_ids = [
     "asst_c31H2OYVhod2mY2R2rp6E8Ta" # Calibo Universal Assistant
+    ,"asst_P618SrZ2d46NbgHKPcFSF9So" # Calibo Universal Assistant with Data
+    ,"asst_2RwWE7PObHVUxta6YHChgNXv" # Content Creator Marketing Briefs
     ,"asst_cuNHZWVmMTSGZE6hoGplgH27" # Calibo Sales
     ,"asst_k0AWkqe2WOvcapTeaJyzUhlJ" # Calibo Marketing
     ,"asst_fHy8v3BaH1i9CdsIURkm4hb8" # Calibo Product
@@ -85,6 +91,43 @@ if "assistant_id_instructions" not in st.session_state:
                                 I can do for you if you are unsure. I am working \
                                     really well, when I can interact with the \
                                         other Calibo expert assistants. Let's go!"
+            ,"prompt": "Take everything that you know about our competitor \
+                Harness from the attached document (harness_homepage.pdf) and \
+                    understand their market positioning and main features. Then \
+                        create a structured comparison report between Calibo \
+                            and Harness and highlight the key differences \
+                                between the two products. Give recommendations \
+                                    on how to position Calibo against Harness \
+                                        in the market."
+        },
+        # universal assistant with data
+        "asst_P618SrZ2d46NbgHKPcFSF9So": {
+            "subheader": "Helping you to scale up Calibo to new heights."
+            ,"instructions": "Ask me to help you with any request in the areas of \
+                content creation, strategy development or market and competitive \
+                    research. I can currently work with PDF attachments but cannot \
+                        access the internet. I've been trained on Calibo's company \
+                            data including its product documentation, sales pitch deck \
+                                and marketing briefs. Start with the sample prompt below \
+                            or create your own. You can always ask me what \
+                                I can do for you if you are unsure. Let's go!"
+            ,"prompt": "Take everything that you know about our competitor \
+                Harness from https://developer.harness.io/docs/ and \
+                    understand their market positioning and main features. Then \
+                        create a structured comparison report between Calibo \
+                            and Harness and highlight the key differences \
+                                between the two products. Give recommendations \
+                                    on how to position Calibo against Harness \
+                                        in the market."
+        },  
+        # content creator marketing briefs
+        "asst_2RwWE7PObHVUxta6YHChgNXv": {
+            "subheader": "Creates drafts for marketing briefs about \
+                how a particular persona benefits from using Calibo. \
+                    Works with sales, marketing and product assistants \
+                        to create the briefs."
+            ,"instructions": "See the example prompt below. \
+                Replace the persona name with the persona you want to use."
             ,"prompt": "Create a draft for a compelling 1-2 pager marketing \
                 brief about how Product Managers can use Calibo and what \
                     their benefits are from using it."
@@ -105,6 +148,21 @@ if "start_chat" not in st.session_state:
 
 if "thread_id" not in st.session_state:
     st.session_state.thread_id = None
+
+if "last_prompt" not in st.session_state:
+    st.session_state.last_prompt = None
+
+if "run_with_scraping" not in st.session_state:
+    st.session_state.run_with_scraping = False
+
+if "scraping_option" not in st.session_state:
+    st.session_state.scraping_option = None
+
+if "uploaded_file_id" not in st.session_state:
+    st.session_state.uploaded_file_id_list = []
+
+if "scraping_file_id_list" not in st.session_state:
+    st.session_state.scraping_file_id_list = []
 
 ## PAGE CONFIG ##
 
@@ -231,7 +289,6 @@ def process_message_with_citations(message):
     message_content = message.content[0].text
     annotations = message_content.annotations if hasattr(message_content, 'annotations') else []
     citations = []
-
     # Iterate over the annotations and add footnotes
     for index, annotation in enumerate(annotations):
         # Replace the text with a footnote
@@ -250,6 +307,14 @@ def process_message_with_citations(message):
     # Add footnotes to the end of the message content
     full_response = message_content.value + '\n\n' + '\n'.join(citations)
     return full_response
+
+# Define the function to extract the first URL from user prompt if any is available
+def extract_url(text):
+    url_pattern = re.compile(r'https?://[^\s<>"]+|www\.[^\s<>"]+')
+    match = url_pattern.search(text)
+    if match:
+        return match.group()
+    return None
 
 # Main chat interface setup
 if st.session_state.selected_assistant_name:
@@ -283,60 +348,190 @@ if st.session_state.start_chat:
     # Chat input for the user
     if prompt := st.chat_input("What shall I do?", key="chat_input"):
         # Add user message to the state and display it
-        st.session_state.messages.append({"role": "user", "name": "You", "content": prompt})
         with st.chat_message("user"):
             st.markdown("**You**")
             st.markdown(prompt)
+            # Print message + file if file was uploaded
             if uploaded_file:
                 st.markdown(f"File attached: {uploaded_file.name}")
-
+                st.session_state.messages.append({"role": "user", "name": "You", "content": prompt \
+                                                  + "\n\n" + f"File attached: {uploaded_file.name}"})
+            else:
+                st.session_state.messages.append({"role": "user", "name": "You", "content": prompt})
+        # save prompt in session variable
+        st.session_state.last_prompt = prompt
+        
         # Upload files provided by user
         if uploaded_file:
             with open(f"{uploaded_file.name}", "wb") as f:
                 f.write(uploaded_file.getbuffer())
-            additional_file_id = upload_to_openai(f"{uploaded_file.name}")
+            st.session_state.uploaded_file_id_list.append(upload_to_openai(f"{uploaded_file.name}"))
+            print(st.session_state.uploaded_file_id_list)
 
-        # Add the user's message to the existing thread
-        client.beta.threads.messages.create(
+    if st.session_state.last_prompt:               
+        # If the prompt contains a URL, ask the user about scraping mode
+        url_found = extract_url(st.session_state.last_prompt)
+        if url_found:
+            # set session variable to true
+            st.session_state.run_with_scraping = True
+            # get url
+            url = url_found
+            # scraping instructions
+            st.write("Please select scraping option:")
+            # create a form with radio button
+            with st.form(key='scraping_form'):
+                scraping_option = st.radio("Full scraping can take several minutes.", ("Full Scraping", "Fast Scraping"))
+                if st.form_submit_button(label='Start Scraping'):
+                    st.session_state.scraping_option = scraping_option
+
+        print(st.session_state.last_prompt)
+        print(st.session_state.run_with_scraping)
+        print(st.session_state.scraping_option)
+
+        # Assistant run with web-scraping
+        if st.session_state.last_prompt and st.session_state.run_with_scraping and st.session_state.scraping_option:
+            prompt = st.session_state.last_prompt
+            url = extract_url(prompt)
+            scraping_option = st.session_state.scraping_option
+            if scraping_option == "Full Scraping":
+                print("Full scraping starts")
+                pdf_file_paths = scraping.main(True, url)
+            else:
+                print("Fast scraping starts")
+                pdf_file_paths = scraping.main(False, url)
+            # combine file ids from scraping 
+            print(pdf_file_paths)
+            for pdf_file_path in pdf_file_paths:
+                st.session_state.scraping_file_id_list.append(upload_to_openai(pdf_file_path))
+                print(st.session_state.scraping_file_id_list)
+            
+            # combine file ids from scraping and uploaded file
+            combined_message_file_ids = st.session_state.uploaded_file_id_list + st.session_state.scraping_file_id_list
+            combined_message_file_ids_string = ", ".join(combined_message_file_ids)
+            print(combined_message_file_ids)
+
+            # Adjust prompt for scraping and include file ids
+            adjusted_prompt = prompt + "\n\n To retrieve all information from " + url + \
+                                          " access and read the attached message files (File IDs: " + combined_message_file_ids_string + "). \
+                                            These files contain all information from the website."
+            print(adjusted_prompt)
+
+            # Add the user's message to the existing thread
+            client.beta.threads.messages.create(
+            thread_id=st.session_state.thread_id,
+            role="user",
+            content=adjusted_prompt,
+            file_ids=combined_message_file_ids
+            )
+
+            # Create a run with additional instructions
+            run = client.beta.threads.runs.create(
+                thread_id=st.session_state.thread_id,
+                assistant_id=assistant_id
+            )
+
+            # Poll for the run to complete and retrieve the assistant's messages
+            while run.status != 'completed':
+                time.sleep(1)
+                run = client.beta.threads.runs.retrieve(
+                    thread_id=st.session_state.thread_id,
+                    run_id=run.id
+                )
+            
+            # Print all run steps
+            print(client.beta.threads.runs.steps.list(
+                thread_id=st.session_state.thread_id,
+                run_id=run.id
+            ))
+
+            # Retrieve messages added by the assistant
+            messages = client.beta.threads.messages.list(
+                thread_id=st.session_state.thread_id
+            )
+
+            # Process and display assistant messages
+            assistant_messages_for_run = [
+                message for message in messages 
+                if message.run_id == run.id and message.role == "assistant"
+            ]
+
+            for message in reversed(assistant_messages_for_run):
+                full_response = process_message_with_citations(message)
+                st.session_state.messages.append({"role": "assistant", "name": \
+                                                st.session_state.selected_assistant_name, \
+                                                    "content": full_response})
+                with st.chat_message("assistant"):
+                    st.markdown(f"**{st.session_state.selected_assistant_name}**")
+                    st.markdown(full_response, unsafe_allow_html=True)
+
+            # Reset session variables for run
+            st.session_state.last_prompt = None
+            st.session_state.run_with_scraping = False
+            st.session_state.scraping_option = None
+            st.session_state.uploaded_file_id_list = []
+            st.session_state.scraping_file_id_list = []
+
+        # Assistant run without web-scraping
+        if st.session_state.last_prompt and not st.session_state.run_with_scraping:
+            prompt = st.session_state.last_prompt            
+            # combine file ids from scraping and uploaded file
+            combined_message_file_ids = st.session_state.uploaded_file_id_list + st.session_state.scraping_file_id_list
+            print(combined_message_file_ids)
+
+            # Add the user's message to the existing thread
+            client.beta.threads.messages.create(
             thread_id=st.session_state.thread_id,
             role="user",
             content=prompt,
-            file_ids=[additional_file_id] if uploaded_file else []
-        )
-
-        # Create a run with additional instructions
-        run = client.beta.threads.runs.create(
-            thread_id=st.session_state.thread_id,
-            assistant_id=assistant_id
-        )
-
-        # Poll for the run to complete and retrieve the assistant's messages
-        while run.status != 'completed':
-            time.sleep(1)
-            run = client.beta.threads.runs.retrieve(
-                thread_id=st.session_state.thread_id,
-                run_id=run.id
+            file_ids=combined_message_file_ids
             )
 
-        # Retrieve messages added by the assistant
-        messages = client.beta.threads.messages.list(
-            thread_id=st.session_state.thread_id
-        )
+            # Create a run with additional instructions
+            run = client.beta.threads.runs.create(
+                thread_id=st.session_state.thread_id,
+                assistant_id=assistant_id
+            )
 
-        # Process and display assistant messages
-        assistant_messages_for_run = [
-            message for message in messages 
-            if message.run_id == run.id and message.role == "assistant"
-        ]
+            # Poll for the run to complete and retrieve the assistant's messages
+            while run.status != 'completed':
+                time.sleep(1)
+                run = client.beta.threads.runs.retrieve(
+                    thread_id=st.session_state.thread_id,
+                    run_id=run.id
+                )
+            
+            # Print run steps
+            print(client.beta.threads.runs.steps.list(
+                thread_id=st.session_state.thread_id,
+                run_id=run.id
+            ))
 
-        for message in reversed(assistant_messages_for_run):
-            full_response = process_message_with_citations(message)
-            st.session_state.messages.append({"role": "assistant", "name": \
-                                              st.session_state.selected_assistant_name, \
-                                                "content": full_response})
-            with st.chat_message("assistant"):
-                st.markdown(f"**{st.session_state.selected_assistant_name}**")
-                st.markdown(full_response, unsafe_allow_html=True)
+            # Retrieve messages added by the assistant
+            messages = client.beta.threads.messages.list(
+                thread_id=st.session_state.thread_id
+            )
+
+            # Process and display assistant messages
+            assistant_messages_for_run = [
+                message for message in messages 
+                if message.run_id == run.id and message.role == "assistant"
+            ]
+
+            for message in reversed(assistant_messages_for_run):
+                full_response = process_message_with_citations(message)
+                st.session_state.messages.append({"role": "assistant", "name": \
+                                                st.session_state.selected_assistant_name, \
+                                                    "content": full_response})
+                with st.chat_message("assistant"):
+                    st.markdown(f"**{st.session_state.selected_assistant_name}**")
+                    st.markdown(full_response, unsafe_allow_html=True)
+            
+            # Reset session variables for run
+            st.session_state.last_prompt = None
+            st.session_state.run_with_scraping = False
+            st.session_state.scraping_option = None
+            st.session_state.uploaded_file_id_list = []
+            st.session_state.scraping_file_id_list = []
 
 else:
     # Prompt to start the chat
