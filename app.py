@@ -368,10 +368,11 @@ if st.session_state.start_chat:
                 f.write(uploaded_file.getbuffer())
             st.session_state.uploaded_file_id_list.append(upload_to_openai(f"{uploaded_file.name}"))
 
+    # Only allow scraping for the universal assistant
     if st.session_state.last_prompt:               
         # If the prompt contains a URL, ask the user about scraping mode
         url_found = extract_url(st.session_state.last_prompt)
-        if url_found:
+        if url_found and assistant_id == 'asst_c31H2OYVhod2mY2R2rp6E8Ta':
             # set session variable to true
             st.session_state.run_with_scraping = True
             # get url
