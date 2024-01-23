@@ -85,20 +85,16 @@ if "assistant_id_instructions" not in st.session_state:
             "subheader": "Helping you to scale up Calibo to new heights."
             ,"instructions": "Ask me to help you with any request in the areas of \
                 content creation, strategy development or market and competitive \
-                    research. I can currently work with PDF attachments but cannot \
-                        access the internet. Start with the sample prompt below \
+                    research. I can access the internet to scrape and summarize \
+                        new information. Start with the sample prompt below \
                             or create your own. You can always ask me what \
                                 I can do for you if you are unsure. I am working \
                                     really well, when I can interact with the \
                                         other Calibo expert assistants. Let's go!"
             ,"prompt": "Take everything that you know about our competitor \
                 Harness from https://www.harness.io/ and \
-                    understand their market positioning and main features. Then \
-                        create a structured comparison report between Calibo \
-                            and Harness and highlight the key differences \
-                                between the two products. Give recommendations \
-                                    on how to position Calibo against Harness \
-                                        in the market."
+                    understand their market positioning and main features. \
+                        Summarize your findings in a structured report."
         },
         # universal assistant with data
         "asst_P618SrZ2d46NbgHKPcFSF9So": {
@@ -119,11 +115,10 @@ if "assistant_id_instructions" not in st.session_state:
         # content creator marketing briefs
         "asst_2RwWE7PObHVUxta6YHChgNXv": {
             "subheader": "Creates drafts for marketing briefs about \
-                how a particular persona benefits from using Calibo. \
+                Calibo for user-defined audiences and use cases. \
                     Works with sales, marketing and product assistants \
                         to create the briefs."
-            ,"instructions": "See the example prompt below. \
-                Replace the persona name with the persona you want to use."
+            ,"instructions": "To see how it works, test the example prompt below."
             ,"prompt": "Create a draft for a compelling 1-2 pager marketing \
                 brief about how Product Managers can use Calibo and what \
                     their benefits are from using it."
@@ -537,3 +532,39 @@ if st.session_state.start_chat:
 else:
     # Prompt to start the chat
     st.write("Please enter API Key to begin your work with the assistants.")
+    # Expanders to explain the use cases in three columns
+    st.write("**Learn more about some use cases for this app below:**")
+    with st.expander("**Marketing Content Creator**"):
+        st.write("The **000 ASSISTANT CREATOR MARKETING BRIEFS** can help you \
+                    to create appealing marketing briefs for your target audience. \
+                    Simply describe what you want to achieve with the brief. \
+                    It can be a paper about the benefits of Calibo for a particular \
+                    persona or how Calibo can be used to solve a particular problem. \
+                    The assistant will ask some clarifying questions before it \
+                    creates a draft for you. You can answer these questions yourself \
+                    or use **001 ASSISTANT SALES**, **002 ASSISTANT MARKETING**, \
+                    and **003 ASSISTANT PRODUCT** to help you with the answers. \
+                    To see how that works, you can start with the example prompt \
+                    showing up when you select the 000 assistant.")
+    with st.expander("**Match in Heaven!**"):
+        st.write("The **007 CALIBO UNIVERSAL ASSISTANT WITH DATA** has been trained \
+                    with the most data about Calibo. Hypothetically, it can be used \
+                    for any task that involves Calibo. In particular, you can use it \
+                    to compare and combine Calibo with other companies. For example, \
+                    you can ask it to combine Calibo with Snowflake and create a \
+                    marketing brief about why Calibo and Snowflake are a match in \
+                    heaven for enterprise customers. To see how that works, you can \
+                    start with the example prompt showing up when you select the 007 \
+                    assistant.")
+    with st.expander("**Competitor Research**"):
+        st.write("The **006 INTERNET RESEARCH ASSISTANT** can help you to \
+                    research the internet for information. It can summarize \
+                    information from websites. For example, you can use this assistant \
+                    to scrape and summarize contents from a competitor like Harness \
+                    (www.harness.io). You can then use the **007 CALIBO UNIVERSAL \
+                    ASSISTANT WITH DATA** to combine the information about Harness \
+                    with the information about Calibo and create a structured \
+                    comparison report between the two products. This can help you \
+                    to better understand how to position Calibo against its competitors. \
+                    To see how that works, you can start with the example prompt \
+                    showing up when you select the 006 assistant.")
