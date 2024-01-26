@@ -22,6 +22,7 @@ available_assistant_ids = [
     ,"asst_cuNHZWVmMTSGZE6hoGplgH27" # Calibo Sales
     ,"asst_k0AWkqe2WOvcapTeaJyzUhlJ" # Calibo Marketing
     ,"asst_fHy8v3BaH1i9CdsIURkm4hb8" # Calibo Product
+    ,"asst_PaN8tD7WflzmYxTUMNI3ZaVB" #test assistant
     # ,"asst_lBblJYey0PciYoPmZFFPAKXF" # Calibo Internet Assistant
 ]
 
@@ -139,6 +140,12 @@ if "assistant_id_instructions" not in st.session_state:
             ,"instructions": "Provide questions and URLs to the websites \
                 you want to access and summarize."
             ,"prompt": "Summarize the contents from www.snowflake.com."
+        },
+        #test assistant
+        "asst_PaN8tD7WflzmYxTUMNI3ZaVB": {
+            "subheader":"Test"
+            ,"instructions":"test"
+            ,"prompt":"test"
         }
 
     }
